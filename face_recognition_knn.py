@@ -28,9 +28,15 @@ import pickle
 from PIL import Image, ImageDraw
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
+from openpyxl import Workbook, load_workbook
+from openpyxl.utils import get_column_letter,column_index_from_string
+from openpyxl.cell import Cell
+import time
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
+
+currentDate = time.strftime("%d_%m_%y")
 
 def train(train_dir, model_save_path=None, n_neighbors=None, knn_algo='ball_tree', verbose=False):
     """
@@ -168,12 +174,12 @@ if __name__ == "__main__":
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
     print("Training KNN classifier...")
-    classifier = train("knn_examples/train", model_save_path="trained_knn_model.clf", n_neighbors=2)
+    classifier = train("dataset/train", model_save_path="trained_knn_model.clf", n_neighbors=2)
     print("Training complete!")
 
     # STEP 2: Using the trained classifier, make predictions for unknown images
-    for image_file in os.listdir("knn_examples/test"):
-        full_file_path = os.path.join("knn_examples/test", image_file)
+    for image_file in os.listdir("dataset/test"):
+        full_file_path = os.path.join("dataset/test", image_file)
 
         print("Looking for faces in {}".format(image_file))
 
@@ -182,8 +188,67 @@ if __name__ == "__main__":
         predictions = predict(full_file_path, model_path="trained_knn_model.clf")
 
         # Print results on the console
-        for name, (top, right, bottom, left) in predictions:
-            print("- Found {} at ({}, {})".format(name, left, top))
+        if(os.path.exists('./Attendance.xlsx')):
+            wb = load_workbook(filename = "Attendance.xlsx")
+            sheet = wb.get_sheet_by_name('CseIII')
+            col_index = 4
+            while(True):
+                    col = get_column_letter(col_index)
+                    col = col + '1'
+                    if(sheet[col].value == currentDate):
+                        break
+                    col_index += 1
+            for enrollment, (top, right, bottom, left) in predictions:
+                print("- Found {} at ({}, {})".format(enrollment, left, top))
+                row = get_column_letter(1)
+                i = 3
+                while(True):
+                    row = row + str(i)
+                    if enrollment == 'unknown':
+                        break
+                    elif(sheet[row].value == enrollment):
+                                print(row)
+                                col = get_column_letter(col_index)
+                                sheet[col + str(i)].value = 1
+                                break
+                    else:
+                        i += 1
+                        row = get_column_letter(1)
+                print('while ke bahar')
+            print('for ke bahar')
+        else:
+            print("No workbook found")
+                
+
+
+
+        
+        '''
+        for enrollment, (top, right, bottom, left) in predictions:
+            print("- Found {} at ({}, {})".format(enrollment, left, top))
+            if(os.path.exists('./Attendance.xlsx')):
+                wb = load_workbook(filename = "Attendance.xlsx")
+                sheet = wb.get_sheet_by_name('CseIII')
+                col_index = 4
+                while(True):
+                    col = get_column_letter(col_index)
+                    col = col + '1'
+                    if(sheet[col].value == currentDate):
+                         row = get_column_letter(1)
+                         i = 3
+                         while(True):
+                            row = row + str(i)
+                            if(sheet[row].value == enrollment):
+                                sheet[col + str(i)] = 1
+                                break
+                            i += 1
+                            
+                         break
+                    else:
+                        col_index += 1
+                        
+        '''                     
+        wb.save(filename = "Attendance.xlsx")     
 
         # Display results overlaid on an image
-        show_prediction_labels_on_image(os.path.join("knn_examples/test", image_file), predictions)
+        show_prediction_labels_on_image(os.path.join("dataset/test", image_file), predictions)

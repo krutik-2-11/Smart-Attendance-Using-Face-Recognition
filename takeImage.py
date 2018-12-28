@@ -17,7 +17,7 @@ face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 # Initialize sample face image
 count = 0
 
-assure_path_exists("dataset/" + str(face_id))
+assure_path_exists("dataset/train/" + str(face_id))
 
 # Start looping
 while(True):
@@ -41,7 +41,8 @@ while(True):
         count += 1
 
         # Save the captured image into the datasets folder
-        cv2.imwrite("dataset/" +str(face_id)+ "/User." + str(face_id) + '.' + str(count) + ".jpg", gray[y:y+h,x:x+w])
+        #cv2.imwrite("dataset/train/" +str(face_id)+ "/User." + str(face_id) + '.' + str(count) + ".jpg", gray[y:y+h,x:x+w])
+        cv2.imwrite("dataset/train/" +str(face_id)+ "/" + str(count) + ".jpg", gray[y:y+h,x:x+w])
 
         # Display the video frame, with bounded rectangle on the person's face
         cv2.imshow('frame', image_frame)

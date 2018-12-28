@@ -43,9 +43,9 @@ def takeImage():
                 #incrementing sample number 
                 sampleNum=sampleNum+1
 
-                if not os.path.exists('dataset/' + enrollment):
-                    os.mkdir('dataset/' + enrollment)
-                cv2.imwrite("dataset/" + enrollment + "/" +  str(sampleNum) + ".jpg", img[y:y+h,x:x+w])
+                if not os.path.exists('dataset/train/' + enrollment):
+                    os.mkdir('dataset/train/' + enrollment)
+                cv2.imwrite("dataset/train/" + enrollment + "/" +  str(sampleNum) + ".jpg", img[y:y+h,x:x+w])
                 #display the frame
                 cv2.imshow('frame',img)
             #wait for 100 miliseconds 
